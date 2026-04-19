@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const { Registry, collectDefaultMetrics, Counter } = require('prom-client');
 
 const app = express();
@@ -18,9 +19,11 @@ const httpRequestCounter = new Counter({
 // Middleware to track metrics
 app.use((req, res, next) => {
   res.on('finish', () => {
-    // We try to match a route if possible, or use the path
-    const route = req.route ? req.route.path : req.path;
-    httpRequestCounter.labels(req.method, route, res.statusCode.toString()).inc();
+    // We try to match a route if possible (excluding static files)
+    if (req.path.startsWith('/api') || req.path === '/health' || req.path === '/metrics') {
+      const route = req.route ? req.route.path : req.path;
+      httpRequestCounter.labels(req.method, route, res.statusCode.toString()).inc();
+    }
   });
   next();
 });
@@ -40,7 +43,7 @@ const cookies = [
   { id: 3, name: "Fudgy Brownie", desc: "Rich gooey chocolate brownie.", rating: 5 }
 ];
 
-// Routes
+// Health and Metrics Routes
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', uptime: process.uptime() });
 });
@@ -50,6 +53,7 @@ app.get('/metrics', async (req, res) => {
   res.end(await register.metrics());
 });
 
+// API Routes
 app.get('/api/drinks', (req, res) => {
   res.status(200).json(drinks);
 });
@@ -76,6 +80,19 @@ app.post('/api/order', (req, res) => {
 
 app.get('/api/orders', (req, res) => {
   res.status(200).json(orders);
+});
+
+// Serve static frontend files
+const distPath = path.join(__dirname, '../../dist');
+app.use(express.static(distPath));
+
+// Catch-all route to serve the React app
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(distPath, 'index.html'));
+  } else {
+    res.status(404).json({ error: 'API endpoint not found' });
+  }
 });
 
 // Method for test isolation

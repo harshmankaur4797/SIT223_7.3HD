@@ -3,7 +3,7 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: "deakin-coffee-backend"
+  - job_name: "deakin-coffee-app"
     static_configs:
-      - targets: ["coffee-backend:3001"]
+      - targets: ["coffee-prod:3001", "coffee-staging:3001"]
     metrics_path: "/metrics"
