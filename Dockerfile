@@ -1,5 +1,5 @@
 # Stage 1: Build Frontend
-FROM node:18 AS frontend-builder
+FROM node:20 AS frontend-builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -7,13 +7,13 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Build Backend
-FROM node:18-alpine AS backend-builder
+FROM node:20 AS backend-builder
 WORKDIR /app/backend
 COPY backend/package*.json ./
 RUN npm ci --omit=dev
 
 # Stage 3: Production
-FROM node:18-alpine
+FROM node:20-alpine
 LABEL maintainer="harshmankaur4797"
 LABEL status="HD-Ready"
 
