@@ -1,0 +1,24 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+.top-image {
+  width: 100vw; 
+  margin-left: calc(50% - 50vw); 
+  margin-right: calc(50% - 50vw); 
+  overflow: hidden;
+}
+
+/* the actual banner image */
+.top-image img {
+  width: 100%;
+  height: 400px;       
+  object-fit: cover;   
+  display: block;   
+}
+
+/* responsive height */
+@media (max-width: 768px) {
+  .top-image img { height: 260px; }
+}
