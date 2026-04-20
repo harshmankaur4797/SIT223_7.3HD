@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'NodeJS-20'
+        nodejs 'NodeJS-22'
     }
 
     environment {
@@ -39,7 +39,7 @@ pipeline {
                 sh 'cd backend && npm ci'
                 
                 echo "Installing frontend dependencies and building..."
-                sh 'npm ci && npm run build'
+                sh 'npm ci --legacy-peer-deps && npm run build'
                 
                 script {
                     // Docker build using the root Dockerfile (Multi-stage)
