@@ -1,7 +1,7 @@
 # SIT223/SIT753 DevOps Pipeline - High Distinction Submission
 
 **Project Title:** Deakin Coffee House - Integrated Web Application
-**Author:** [Your Name]
+**Author:** Harsh Mankaur
 **GitHub Repository:** https://github.com/harshmankaur4797/SIT223_7.3HD
 
 ---

@@ -83,7 +83,8 @@ pipeline {
                         -Dsonar.projectName='Deakin Coffee House SIT223' \
                         -Dsonar.sources=backend/src,src \
                         -Dsonar.tests=backend/tests \
-                        -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info"
+                        -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+                        -Dsonar.host.url=http://host.docker.internal:9000"
                 }
                 timeout(time: 5, unit: 'MINUTES') {
                     // Top HD Requirement: Enforce Quality Gate

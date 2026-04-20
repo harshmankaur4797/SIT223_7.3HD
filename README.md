@@ -85,7 +85,7 @@ To successfully run this pipeline, the following setup is required:
     *   SonarQube Scanner
     *   HTML Publisher
 2.  **Global Tool Configuration**:
-    *   Add **NodeJS** installation named `NodeJS-18`.
+    *   Add **NodeJS** installation named `NodeJS-20`.
 3.  **System Configuration**:
     *   Add **SonarQube Server** named `SonarQube` at `http://localhost:9000`.
 4.  **Credentials**:
