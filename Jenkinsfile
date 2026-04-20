@@ -96,21 +96,21 @@ pipeline {
                         '''
                     }
                 }
-            }
-            post {
-                always {
-                    timeout(time: 5, unit: 'MINUTES') {
-                        script {
-                            def qg = waitForQualityGate()
-                            if (qg.status != 'OK') {
-                                echo "Quality Gate status: ${qg.status}"
-                                echo "Warning: Quality gate not passed but continuing pipeline"
-                            }
+                // Check Quality Gate status in the main steps to ensure context is maintained
+                timeout(time: 5, unit: 'MINUTES') {
+                    script {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            echo "Quality Gate status: ${qg.status}"
+                            echo "Warning: Quality gate not passed but continuing pipeline"
+                        } else {
+                            echo "Quality Gate passed! ✅"
                         }
                     }
                 }
             }
         }
+
 
 
         stage('DevSecOps - Security') {
