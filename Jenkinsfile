@@ -97,33 +97,34 @@ pipeline {
                         
                         script {
                             echo "Performing high-reliability Quality Gate verification..."
-                            // Direct API Polling ensures 100% success by bypassing Jenkins plugin glitches
-                            sh """
+                            // Using triple-single-quotes to avoid Groovy interpolation issues with shell variables
+                            sh '''
                             set +e
-                            TASK_URL=$(grep 'ceTaskUrl' .scannerwork/report-task.txt | cut -d= -f2)
-                            echo "Polling Task URL: \$TASK_URL"
-                            STATUS='PENDING'
+                            TASK_URL=$(grep "ceTaskUrl" .scannerwork/report-task.txt | cut -d= -f2)
+                            echo "Polling Task URL: $TASK_URL"
+                            STATUS="PENDING"
                             ITERATION=0
-                            while [ "\$STATUS" != 'SUCCESS' ] && [ \$ITERATION -lt 20 ]; do
-                                echo "Waiting for SonarQube to process (Attempt \$ITERATION)..."
+                            while [ "$STATUS" != "SUCCESS" ] && [ $ITERATION -lt 20 ]; do
+                                echo "Waiting for SonarQube to process (Attempt $ITERATION)..."
                                 sleep 10
-                                RESPONSE=\$(curl -s -u \${SONAR_TOKEN}: "\$TASK_URL")
-                                STATUS=\$(echo "\$RESPONSE" | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
-                                echo "Current Task Status: \$STATUS"
-                                if [ "\$STATUS" == 'FAILED' ] || [ "\$STATUS" == 'CANCELED' ]; then
+                                RESPONSE=$(curl -s -u ${SONAR_TOKEN}: "$TASK_URL")
+                                STATUS=$(echo "$RESPONSE" | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
+                                echo "Current Task Status: $STATUS"
+                                if [ "$STATUS" == "FAILED" ] || [ "$STATUS" == "CANCELED" ]; then
                                     echo "SonarQube Scan FAILED!"
                                     exit 1
                                 fi
-                                ITERATION=\$((ITERATION+1))
+                                ITERATION=$((ITERATION+1))
                             done
                             
-                            if [ "\$STATUS" != 'SUCCESS' ]; then
+                            if [ "$STATUS" != "SUCCESS" ]; then
                                 echo "SonarQube Timeout!"
                                 exit 1
                             fi
-                            """
+                            '''
                             echo "Industrial Quality Gate verification complete! ✅"
                         }
+
                     }
                 }
             }
