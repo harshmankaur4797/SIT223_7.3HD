@@ -100,7 +100,7 @@ pipeline {
                             // Using triple-single-quotes to avoid Groovy interpolation issues with shell variables
                             sh '''
                             set +e
-                            TASK_URL=$(grep "ceTaskUrl" .scannerwork/report-task.txt | cut -d= -f2)
+                            TASK_URL=$(grep "ceTaskUrl" .scannerwork/report-task.txt | cut -d= -f2-)
                             echo "Polling Task URL: $TASK_URL"
                             STATUS="PENDING"
                             ITERATION=0
