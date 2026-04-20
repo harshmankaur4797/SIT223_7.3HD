@@ -42,8 +42,13 @@ pipeline {
                 sh 'npm ci --legacy-peer-deps && npm run build'
                 
                 script {
+                    // Pre-pull images to bypass DNS lookup issues in build stage
+                    sh "docker pull node:20"
+                    sh "docker pull node:20-alpine"
+                    
                     // Docker build using the root Dockerfile (Multi-stage)
-                    docker.build("${FULL_IMAGE}", "--no-cache .")
+                    // Use --network host to resolve DNS issues inside build containers
+                    docker.build("${FULL_IMAGE}", "--network host --no-cache .")
                     sh "docker tag ${FULL_IMAGE} ${LATEST_IMAGE}"
                 }
             }
