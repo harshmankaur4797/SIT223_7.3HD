@@ -83,13 +83,18 @@ pipeline {
         stage('Code Quality Analysis') {
             steps {
                 withSonarQubeEnv("${SONAR_SERVER}") {
-                    sh "npx sonar-scanner \
-                        -Dsonar.projectKey=deakin-coffee \
-                        -Dsonar.projectName='Deakin Coffee House SIT223' \
-                        -Dsonar.sources=backend/src,src \
-                        -Dsonar.tests=backend/tests \
-                        -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
-                        -Dsonar.host.url=http://sonarqube:9000"
+                    withCredentials([string(credentialsId: 'sonar_token', variable: 'SONAR_TOKEN')]) {
+                        sh '''
+                        npx sonar-scanner \
+                          -Dsonar.projectKey=deakin-coffee \
+                          -Dsonar.projectName="Deakin Coffee House SIT223" \
+                          -Dsonar.sources=backend/src,src \
+                          -Dsonar.tests=backend/tests \
+                          -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
+                          -Dsonar.host.url=http://sonarqube:9000 \
+                          -Dsonar.login=$SONAR_TOKEN
+                        '''
+                    }
                 }
             }
             post {
@@ -106,6 +111,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('DevSecOps - Security') {
             parallel {
