@@ -95,16 +95,17 @@ pipeline {
                           -Dsonar.token=$SONAR_TOKEN
                         '''
                     }
-                }
-                // Check Quality Gate status with abortPipeline set to true for HD requirement
-                timeout(time: 5, unit: 'MINUTES') {
-                    script {
-                        def qg = waitForQualityGate abortPipeline: true
-                        echo "Quality Gate passed! Status: ${qg.status} ✅"
+                    // Nesting the Quality Gate check inside withSonarQubeEnv to ensure 100% auth inheritance
+                    timeout(time: 5, unit: 'MINUTES') {
+                        script {
+                            def qg = waitForQualityGate abortPipeline: true
+                            echo "Quality Gate passed! Status: ${qg.status} ✅"
+                        }
                     }
                 }
             }
         }
+
 
 
 
