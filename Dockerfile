@@ -2,7 +2,7 @@
 FROM node:20 AS frontend-builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN rm -f package-lock.json && npm install
 COPY . .
 RUN npm run build
 
