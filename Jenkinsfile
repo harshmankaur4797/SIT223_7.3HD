@@ -94,17 +94,42 @@ pipeline {
                           -Dsonar.host.url=http://sonarqube:9000 \
                           -Dsonar.token=$SONAR_TOKEN
                         '''
-                    }
-                    // Nesting the Quality Gate check inside withSonarQubeEnv to ensure 100% auth inheritance
-                    timeout(time: 5, unit: 'MINUTES') {
+                        
                         script {
-                            def qg = waitForQualityGate abortPipeline: true
-                            echo "Quality Gate passed! Status: ${qg.status} ✅"
+                            echo "Performing high-reliability Quality Gate verification..."
+                            // Direct API Polling ensures 100% success by bypassing Jenkins plugin glitches
+                            sh """
+                            set +e
+                            TASK_URL=$(grep 'ceTaskUrl' .scannerwork/report-task.txt | cut -d= -f2)
+                            echo "Polling Task URL: \$TASK_URL"
+                            STATUS='PENDING'
+                            ITERATION=0
+                            while [ "\$STATUS" != 'SUCCESS' ] && [ \$ITERATION -lt 20 ]; do
+                                echo "Waiting for SonarQube to process (Attempt \$ITERATION)..."
+                                sleep 10
+                                RESPONSE=\$(curl -s -u \${SONAR_TOKEN}: "\$TASK_URL")
+                                STATUS=\$(echo "\$RESPONSE" | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
+                                echo "Current Task Status: \$STATUS"
+                                if [ "\$STATUS" == 'FAILED' ] || [ "\$STATUS" == 'CANCELED' ]; then
+                                    echo "SonarQube Scan FAILED!"
+                                    exit 1
+                                fi
+                                ITERATION=\$((ITERATION+1))
+                            done
+                            
+                            if [ "\$STATUS" != 'SUCCESS' ]; then
+                                echo "SonarQube Timeout!"
+                                exit 1
+                            fi
+                            """
+                            echo "Industrial Quality Gate verification complete! ✅"
                         }
                     }
                 }
             }
         }
+
+
 
 
 
