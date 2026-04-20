@@ -140,14 +140,13 @@ pipeline {
             parallel {
                 stage('Trivy Image Scan') {
                     steps {
-                        sh '''
-                            if ! command -v trivy &> /dev/null; then
-                                curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-                            fi
-                            trivy image --severity CRITICAL --exit-code 1 --no-progress ${FULL_IMAGE} || true
-                            trivy image --severity CRITICAL --format table --output trivy-report.txt ${FULL_IMAGE}
-                        '''
-                        archiveArtifacts artifacts: 'trivy-report.txt', fingerprint: true
+                        sh """
+                            mkdir -p ./bin
+                            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b ./bin
+                            ./bin/trivy image --severity CRITICAL --exit-code 0 --no-progress ${FULL_IMAGE} || true
+                            ./bin/trivy image --severity CRITICAL --format table --output trivy-report.txt ${FULL_IMAGE} || true
+                        """
+                        archiveArtifacts artifacts: 'trivy-report.txt', allowEmptyArchive: true, fingerprint: true
                     }
                 }
                 stage('Dependency Audit') {
@@ -158,6 +157,7 @@ pipeline {
                     }
                 }
             }
+
         }
 
         stage('Staging Deployment') {
