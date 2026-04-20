@@ -92,24 +92,20 @@ pipeline {
                           -Dsonar.tests=backend/tests \
                           -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info \
                           -Dsonar.host.url=http://sonarqube:9000 \
-                          -Dsonar.login=$SONAR_TOKEN
+                          -Dsonar.token=$SONAR_TOKEN
                         '''
                     }
                 }
-                // Check Quality Gate status in the main steps to ensure context is maintained
+                // Check Quality Gate status with abortPipeline set to true for HD requirement
                 timeout(time: 5, unit: 'MINUTES') {
                     script {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            echo "Quality Gate status: ${qg.status}"
-                            echo "Warning: Quality gate not passed but continuing pipeline"
-                        } else {
-                            echo "Quality Gate passed! ✅"
-                        }
+                        def qg = waitForQualityGate abortPipeline: true
+                        echo "Quality Gate passed! Status: ${qg.status} ✅"
                     }
                 }
             }
         }
+
 
 
 
