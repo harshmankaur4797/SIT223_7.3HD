@@ -1,0 +1,46 @@
+{
+  "name": "taskmanager-devops",
+  "version": "1.0.0",
+  "description": "Task Manager REST API with CI/CD Pipeline",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "jest --ci --reporters=default --reporters=jest-junit --coverage",
+    "lint": "eslint src/**"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3",
+    "jest-junit": "^16.0.0",
+    "eslint": "^8.38.0",
+    "retire": "^4.4.2"
+  },
+  "jest-junit": {
+    "outputDirectory": "./reports/junit",
+    "outputName": "junit.xml"
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "commonjs": true,
+      "es2021": true,
+      "jest": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "ecmaVersion": "latest"
+    },
+    "rules": {
+      "indent": ["error", 2],
+      "linebreak-style": ["off"],
+      "quotes": ["error", "single"],
+      "semi": ["error", "always"],
+      "no-unused-vars": "warn",
+      "no-undef": "off",
+      "no-console": "off"
+    }
+  }
+}

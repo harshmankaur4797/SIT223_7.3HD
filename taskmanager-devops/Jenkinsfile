@@ -1,0 +1,129 @@
+pipeline {
+    agent any
+
+    environment {
+        STAGING_PORT = '3001'
+        PROD_PORT = '3000'
+    }
+
+    stages {
+        stage('BUILD') {
+            steps {
+                bat 'npm install'
+                archiveArtifacts artifacts: 'package.json', fingerprint: true
+            }
+        }
+
+        stage('TEST') {
+            steps {
+                bat 'npm test'
+                junit 'reports/junit/*.xml'
+            }
+        }
+
+        stage('CODE QUALITY') {
+            steps {
+                bat 'npm run lint || exit /b 0'
+                // Assuming sonar-scanner is in PATH. If not, use 'npx sonar-scanner'
+                bat 'sonar-scanner || exit /b 0'
+            }
+        }
+
+        stage('SECURITY') {
+            steps {
+                bat 'npm audit --json > audit-report.json || exit /b 0'
+                bat 'npx retire --outputformat json --outputpath retire-report.json || exit /b 0'
+                archiveArtifacts artifacts: '*-report.json', allowEmptyArchive: true
+            }
+        }
+
+        stage('DEPLOY STAGING') {
+            steps {
+                script {
+                    bat """
+                    @echo off
+                    for /f "tokens=5" %%a in ('netstat -ano ^| findstr :${STAGING_PORT} ^| findstr LISTENING') do (
+                        echo Killing process %%a on port ${STAGING_PORT}
+                        taskkill /PID %%a /F
+                    )
+                    set PORT=${STAGING_PORT}
+                    start "" /b cmd /c node src/server.js
+                    timeout /t 5 /nobreak
+                    """
+                    
+                    // Health Check Loop
+                    bat """
+                    @echo off
+                    set RETRY=0
+                    :loop
+                    curl.exe -s http://localhost:${STAGING_PORT}/health | findstr "UP"
+                    if %ERRORLEVEL% equ 0 (
+                        echo Staging is UP
+                        exit /b 0
+                    )
+                    set /a RETRY=%RETRY%+1
+                    if %RETRY% geq 5 (
+                        echo Staging health check failed after 5 retries
+                        exit /b 1
+                    )
+                    timeout /t 3 /nobreak
+                    goto loop
+                    """
+
+                    // Smoke Test
+                    bat """
+                    curl.exe -X POST -H "Content-Type: application/json" -d "{\\"title\\":\\"Staging Smoke Test\\"}" http://localhost:${STAGING_PORT}/tasks
+                    curl.exe http://localhost:${STAGING_PORT}/tasks
+                    """
+                }
+            }
+        }
+
+        stage('RELEASE PRODUCTION') {
+            steps {
+                script {
+                    bat """
+                    @echo off
+                    for /f "tokens=5" %%a in ('netstat -ano ^| findstr :${PROD_PORT} ^| findstr LISTENING') do (
+                        echo Killing process %%a on port ${PROD_PORT}
+                        taskkill /PID %%a /F
+                    )
+                    set PORT=${PROD_PORT}
+                    start "" /b cmd /c node src/server.js
+                    timeout /t 5 /nobreak
+                    """
+
+                    // Health Check
+                    bat 'curl.exe -s http://localhost:${PROD_PORT}/health | findstr "UP"'
+
+                    // Create Git Tag
+                    bat "git tag -a v%BUILD_NUMBER% -m 'Release v%BUILD_NUMBER%'"
+                }
+            }
+        }
+
+        stage('MONITORING') {
+            steps {
+                script {
+                    bat """
+                    echo --- MONITORING REPORT --- > monitoring-report.txt
+                    echo Time: %DATE% %TIME% >> monitoring-report.txt
+                    echo Health Check: >> monitoring-report.txt
+                    curl.exe -s http://localhost:${PROD_PORT}/health >> monitoring-report.txt
+                    echo. >> monitoring-report.txt
+                    echo Metrics: >> monitoring-report.txt
+                    curl.exe -s http://localhost:${PROD_PORT}/metrics >> monitoring-report.txt
+                    type monitoring-report.txt
+                    """
+                    archiveArtifacts artifacts: 'monitoring-report.txt'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline completed.'
+        }
+    }
+}

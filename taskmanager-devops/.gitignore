@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+test-results/
+*.log
+npm-audit-report.json
+retire-report.json
+monitoring-report.txt
+.env

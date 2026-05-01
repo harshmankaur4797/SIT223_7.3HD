@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="12" failures="0" errors="0" time="5.251">
+  <testsuite name="Task Manager API" errors="0" failures="0" skipped="0" timestamp="2026-05-01T06:46:37" time="4.852" tests="12">
+    <testcase classname="Task Manager API POST /tasks - should create a new task" name="Task Manager API POST /tasks - should create a new task" time="0.176">
+    </testcase>
+    <testcase classname="Task Manager API POST /tasks - should fail without title" name="Task Manager API POST /tasks - should fail without title" time="0.022">
+    </testcase>
+    <testcase classname="Task Manager API GET /tasks - should return all tasks" name="Task Manager API GET /tasks - should return all tasks" time="0.014">
+    </testcase>
+    <testcase classname="Task Manager API GET /tasks/:id - should return single task" name="Task Manager API GET /tasks/:id - should return single task" time="0.02">
+    </testcase>
+    <testcase classname="Task Manager API GET /tasks/:id - should return 404 for non-existent task" name="Task Manager API GET /tasks/:id - should return 404 for non-existent task" time="0.019">
+    </testcase>
+    <testcase classname="Task Manager API DELETE /tasks/:id - should delete a task" name="Task Manager API DELETE /tasks/:id - should delete a task" time="0.014">
+    </testcase>
+    <testcase classname="Task Manager API DELETE /tasks/:id - should return 404 for already deleted task" name="Task Manager API DELETE /tasks/:id - should return 404 for already deleted task" time="0.014">
+    </testcase>
+    <testcase classname="Task Manager API GET /health - should return UP status" name="Task Manager API GET /health - should return UP status" time="0.015">
+    </testcase>
+    <testcase classname="Task Manager API GET /metrics - should return Prometheus metrics" name="Task Manager API GET /metrics - should return Prometheus metrics" time="0.02">
+    </testcase>
+    <testcase classname="Task Manager API POST /tasks - should handle empty description" name="Task Manager API POST /tasks - should handle empty description" time="0.019">
+    </testcase>
+    <testcase classname="Task Manager API GET /tasks - should list multiple tasks" name="Task Manager API GET /tasks - should list multiple tasks" time="0.024">
+    </testcase>
+    <testcase classname="Task Manager API GET /health - should be JSON" name="Task Manager API GET /health - should be JSON" time="0.006">
+    </testcase>
+  </testsuite>
+</testsuites>

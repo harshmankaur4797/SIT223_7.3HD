@@ -1,0 +1,7 @@
+--- MONITORING REPORT --- 
+Health: 
+{"status":"UP"} 
+Metrics: 
+task_total 0
+app_uptime_seconds 0
+memory_usage_bytes 46792704
