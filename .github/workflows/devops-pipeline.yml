@@ -1,0 +1,51 @@
+name: Task Manager DevOps Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  devops-pipeline:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: taskmanager-devops
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: taskmanager-devops/package-lock.json
+
+      - name: 1. BUILD
+        run: npm install
+
+      - name: 2. TEST
+        run: npm test
+
+      - name: 3. LINT
+        run: npm run lint
+
+      - name: 4. SECURITY
+        run: |
+          npm audit --json > audit-report.json || true
+          npx retire --outputformat json --outputpath retire-report.json || true
+
+      - name: Archive Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-reports
+          path: |
+            taskmanager-devops/reports/junit/
+            taskmanager-devops/coverage/
+            taskmanager-devops/audit-report.json
+            taskmanager-devops/retire-report.json
